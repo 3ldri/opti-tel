@@ -24,6 +24,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
+import kotlin.concurrent.thread
 
 class MainActivity : AppCompatActivity() {
 
@@ -40,8 +41,12 @@ class MainActivity : AppCompatActivity() {
 
     private val uninstallLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            refreshApps()
-            refreshStorage()
+            loadAppsSafely()
+            try {
+                refreshStorage()
+            } catch (e: Exception) {
+                Toast.makeText(this, "Stockage : ${e.message}", Toast.LENGTH_LONG).show()
+            }
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -95,8 +100,50 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, AiActivity::class.java))
         }
 
-        refreshStorage()
-        refreshApps()
+        try {
+            refreshStorage()
+        } catch (e: Exception) {
+            Toast.makeText(this, "Stockage : ${e.message}", Toast.LENGTH_LONG).show()
+        }
+        loadAppsSafely()
+    }
+
+    private fun loadAppsSafely() {
+        thread {
+            try {
+                val pm = packageManager
+                val launchables = mutableSetOf<String>()
+                pm.queryIntentActivities(
+                    Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER), 0
+                ).forEach { launchables.add(it.activityInfo.packageName) }
+
+                val loaded = pm.getInstalledPackages(0).mapNotNull { info ->
+                    val appInfo: ApplicationInfo = info.applicationInfo ?: return@mapNotNull null
+                    val icon = try {
+                        pm.getApplicationIcon(appInfo)
+                    } catch (e: Exception) {
+                        null
+                    }
+                    AppInfo(
+                        label = pm.getApplicationLabel(appInfo).toString(),
+                        packageName = appInfo.packageName,
+                        isSystem = (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0,
+                        icon = icon,
+                        launchIntent = pm.getLaunchIntentForPackage(appInfo.packageName)
+                    )
+                }.sortedWith(compareBy({ it.isSystem }, { it.label.lowercase() }))
+
+                runOnUiThread {
+                    apps.clear()
+                    apps.addAll(loaded)
+                    listAdapter.notifyDataSetChanged()
+                }
+            } catch (e: Exception) {
+                runOnUiThread {
+                    Toast.makeText(this, "Applis : ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
     }
 
     private fun refreshStorage() {
@@ -126,32 +173,6 @@ class MainActivity : AppCompatActivity() {
         val battery = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
         findViewById<TextView>(R.id.batteryInfo).text =
             getString(R.string.battery_level, if (battery > 0) battery else -1)
-    }
-
-    private fun refreshApps() {
-        val pm = packageManager
-        val flags = PackageManager.GET_ACTIVITIES
-        val launchables = mutableSetOf<String>()
-        pm.queryIntentActivities(
-            Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER), 0
-        ).forEach { launchables.add(it.activityInfo.packageName) }
-
-        val loaded = pm.getInstalledPackages(flags).mapNotNull { info ->
-            val appInfo: ApplicationInfo = info.applicationInfo ?: return@mapNotNull null
-            AppInfo(
-                label = pm.getApplicationLabel(appInfo).toString(),
-                packageName = appInfo.packageName,
-                isSystem = (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0,
-                icon = pm.getApplicationIcon(appInfo),
-                launchIntent = pm.getLaunchIntentForPackage(appInfo.packageName)
-            )
-        }
-
-        apps.clear()
-        apps.addAll(loaded.sortedWith(
-            compareBy({ it.isSystem }, { it.label.lowercase() })
-        ))
-        listAdapter.notifyDataSetChanged()
     }
 
     private fun openAppDetails(packageName: String) {

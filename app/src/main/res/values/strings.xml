@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">OptimPhone</string>
+    <string name="storage_title">Stockage</string>
+    <string name="apps_title">Applications installées</string>
+    <string name="uninstall">Désinstaller</string>
+    <string name="disable">Désactiver</string>
+    <string name="open">Ouvrir</string>
+    <string name="optimize_title">Optimisation</string>
+    <string name="storage_settings">Paramètres de stockage</string>
+    <string name="battery_settings">Optimisation de la batterie</string>
+    <string name="notification_settings">Notifications</string>
+    <string name="accessibility_settings">Accessibilité</string>
+    <string name="storage_used">%1$s utilisés sur %2$s (%3$d%%)</string>
+    <string name="ram_used">RAM : %1$s utilisés sur %2$s</string>
+    <string name="battery_level">Batterie : %1$d%%</string>
+    <string name="no_apps">Aucune application trouvée</string>
+    <string name="system_app_hint">Applis système : utilisez « Désactiver » puis redémarrez. Pour les supprimer complètement, utilisez le script ADB fourni (voir README).</string>
+
+    <string name="ai_title">Assistant IA</string>
+    <string name="ai_analyze">Analyser mon téléphone</string>
+    <string name="ai_tips">Conseils généraux d\'optimisation</string>
+    <string name="ai_settings">Configurer la clé API</string>
+    <string name="ai_need_key">Ajoutez d\'abord votre clé API.</string>
+    <string name="ai_error">Erreur %1$s : %2$s</string>
+    <string name="ai_tips_prompt">Donne-moi 10 conseils concrets pour optimiser un téléphone Android (batterie, stockage, fluidité, confidentialité). Réponds en français, par points courts.</string>
+
+    <string name="ai_settings_title">Configuration IA</string>
+    <string name="ai_base_url">URL de base (API compatible OpenAI)</string>
+    <string name="ai_api_key">Clé API</string>
+    <string name="ai_model">Modèle</string>
+    <string name="ai_save">Enregistrer</string>
+    <string name="ai_saved">Configuration enregistrée</string>
+    <string name="ai_hint_key">Votre clé reste sur le téléphone (stockée localement).</string>
+</resources>

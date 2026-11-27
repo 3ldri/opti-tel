@@ -11,14 +11,27 @@ android {
         applicationId = "com.optimphone.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 2
+        versionCode = 3
         versionName = "1.1"
+    }
+
+    signingConfigs {
+        create("release") {
+            storeFile = file("optimphone.keystore")
+            storePassword = "optimphone123"
+            keyAlias = "optimphone"
+            keyPassword = "optimphone123"
+        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
+        debug {
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
